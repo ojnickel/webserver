@@ -7,7 +7,7 @@ DIRNAME=""
 CERT_TYPE=1 # Default certificate type (1 = self-signed, 2 = Let's Encrypt)
 
 # Function to display help
-function usage() {
+usage () {
     echo "Usage: $0 -d <domain_name> [-k <key_size>] [-v <days_valid>] [-o <output_dir>] [-n <name>] [-t <cert_type>]"
     echo "Options:"
     echo "  -c  Certificate name (optional, default is a random name)"
@@ -21,7 +21,7 @@ function usage() {
 }
 
 # Function to generate a self-signed certificate
-function generate_self_signed() {
+ generate_self_signed() {
     echo "Generating a self-signed certificate..."
 
     # Create output directory if it doesn't exist
@@ -48,7 +48,7 @@ function generate_self_signed() {
 }
 
 # Function to generate a Let's Encrypt certificate
-function generate_lets_encrypt() {
+ generate_lets_encrypt() {
     echo "Generating a Let's Encrypt certificate..."
 
     # Ensure `certbot` is installed
