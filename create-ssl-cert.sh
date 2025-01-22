@@ -96,12 +96,12 @@ while getopts "c:d:k:v:o:n:t:" opt; do
 done
 
 # Ensure domain name is provided
-if [[ -z "$DOMAIN_NAME" ]]; then
+if [ -z "$DOMAIN_NAME" ]; then
     usage
 fi
 
 # Assign DOMAIN_NAME if DIRNAME is not set
-if [[ -z "$DIRNAME" ]]; then
+if [ -z "$DIRNAME" ]; then
     DIRNAME="$DOMAIN_NAME"
 fi
 
@@ -110,9 +110,9 @@ KEY_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.key"
 CERT_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.crt"
 
 # Check the certificate type and call the appropriate function
-if [[ "$CERT_TYPE" -eq 1 ]] ; then
+if [ "$CERT_TYPE" -eq 1 ] ; then
     generate_self_signed 
-elif [[ "$CERT_TYPE" -eq 2 ]] 
+elif [ "$CERT_TYPE" -eq 2 ] 
     generate_lets_encrypt 
 else
     echo "Error: Invalid certificate type specified. Use 1 for self-signed or 2 for Let's Encrypt."
