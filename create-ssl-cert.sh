@@ -110,4 +110,11 @@ KEY_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.key"
 CERT_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.crt"
 
 # Check the certificate type and call the appropriate function
-[[ "$CERT_TYPE" -eq 1 ]] && generate_self_signed || [[ "$CERT_TYPE" -eq 2 ]] && generate_lets_encrypt || { echo "Error: Invalid certificate type specified. Use 1 for self-signed or 2 for Let's Encrypt."; usage; }
+if [[ "$CERT_TYPE" -eq 1 ]] ; then
+    generate_self_signed 
+elif [[ "$CERT_TYPE" -eq 2 ]] 
+    generate_lets_encrypt 
+else
+    echo "Error: Invalid certificate type specified. Use 1 for self-signed or 2 for Let's Encrypt."
+    usage
+fi
