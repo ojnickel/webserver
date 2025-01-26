@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Default values
 CERT_NAME=$(date +%s | sha256sum | base64 | head -c 8)
 KEY_SIZE=4096
@@ -5,10 +7,11 @@ DAYS_VALID=365
 BASE_DIR="$HOME/.local/certs"
 DIRNAME=""
 CERT_TYPE=1 # Default certificate type (1 = self-signed, 2 = Let's Encrypt)
+WEB_SERVER="nginx" # Default web server for Certbot is nginx
 
 # Function to display help
-usage () {
-    echo "Usage: $0 -d <domain_name> [-k <key_size>] [-v <days_valid>] [-o <output_dir>] [-n <name>] [-t <cert_type>]"
+function usage() {
+    echo "Usage: $0 -d <domain_name> [-k <key_size>] [-v <days_valid>] [-o <output_dir>] [-n <name>] [-t <cert_type>] [-w <web_server>]"
     echo "Options:"
     echo "  -c  Certificate name (optional, default is a random name)"
     echo "  -d  Domain name (required, e.g., example.com)"
@@ -17,11 +20,12 @@ usage () {
     echo "  -o  Output directory (optional, default is ~/local/certs/)"
     echo "  -n  Custom directory name for the key and cert (optional)"
     echo "  -t  Certificate type (1 = self-signed, 2 = Let's Encrypt, default is 1)"
+    echo "  -w  Web server to configure for Certbot (optional, options: nginx, apache, none)"
     exit 1
 }
 
 # Function to generate a self-signed certificate
- generate_self_signed() {
+function generate_self_signed() {
     echo "Generating a self-signed certificate..."
 
     # Create output directory if it doesn't exist
@@ -48,8 +52,8 @@ usage () {
 }
 
 # Function to generate a Let's Encrypt certificate
- generate_lets_encrypt() {
-    echo "Generating a Let's Encrypt certificate..."
+function generate_lets_encrypt() {
+    echo "Generating a Let's Encrypt certificate with Certbot..."
 
     # Ensure `certbot` is installed
     if ! command -v certbot &> /dev/null; then
@@ -57,8 +61,25 @@ usage () {
         exit 1
     fi
 
-    # Run certbot to obtain the certificate
-    certbot certonly --standalone --preferred-challenges http -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+    # Check which web server to use for Certbot
+    case "$WEB_SERVER" in
+        nginx)
+            echo "Using NGINX plugin for Certbot..."
+            certbot --nginx -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            ;;
+        apache)
+            echo "Using Apache plugin for Certbot..."
+            certbot --apache -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            ;;
+        none)
+            echo "Using standalone mode for Certbot..."
+            certbot certonly --standalone --preferred-challenges http -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            ;;
+        *)
+            echo "Error: Unsupported web server '$WEB_SERVER'. Use 'nginx', 'apache', or 'none'."
+            exit 1
+            ;;
+    esac
 
     # Copy Let's Encrypt certificates to the output directory
     LETSENCRYPT_DIR="/etc/letsencrypt/live/$DOMAIN_NAME"
@@ -75,8 +96,20 @@ usage () {
     fi
 }
 
+# Function to select the certificate type
+function generate_certificate() {
+    if [[ "$CERT_TYPE" -eq 1 ]]; then
+        generate_self_signed
+    elif [[ "$CERT_TYPE" -eq 2 ]]; then
+        generate_lets_encrypt
+    else
+        echo "Error: Invalid certificate type specified. Use 1 for self-signed or 2 for Let's Encrypt."
+        usage
+    fi
+}
+
 # Parse arguments
-while getopts "c:d:k:v:o:n:t:" opt; do
+while getopts "c:d:k:v:o:n:t:w:" opt; do
     case "$opt" in
         c) CERT_NAME=$OPTARG ;;
         d) DOMAIN_NAME=$OPTARG ;;
@@ -91,17 +124,18 @@ while getopts "c:d:k:v:o:n:t:" opt; do
             fi
             ;;
         t) CERT_TYPE=$OPTARG ;;
+        w) WEB_SERVER=$OPTARG ;;
         *) usage ;;
     esac
 done
 
 # Ensure domain name is provided
-if [ -z "$DOMAIN_NAME" ]; then
+if [[ -z "$DOMAIN_NAME" ]]; then
     usage
 fi
 
 # Assign DOMAIN_NAME if DIRNAME is not set
-if [ -z "$DIRNAME" ]; then
+if [[ -z "$DIRNAME" ]]; then
     DIRNAME="$DOMAIN_NAME"
 fi
 
@@ -109,12 +143,5 @@ fi
 KEY_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.key"
 CERT_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.crt"
 
-# Check the certificate type and call the appropriate function
-if [ "$CERT_TYPE" -eq 1 ] ; then
-    generate_self_signed 
-elif [ "$CERT_TYPE" -eq 2 ] 
-    generate_lets_encrypt 
-else
-    echo "Error: Invalid certificate type specified. Use 1 for self-signed or 2 for Let's Encrypt."
-    usage
-fi
+# Generate the certificate
+generate_certificate
