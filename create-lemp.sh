@@ -1,4 +1,4 @@
-i#!/bin/env bash
+#!/bin/env bash
 
 # Detect Distribution
 if [[ -f /etc/os-release ]]; then
