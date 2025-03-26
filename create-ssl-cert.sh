@@ -51,12 +51,12 @@ function generate_self_signed() {
     echo "  Cert: $CERT_FILE"
 }
 
-# Function to generate a Let's Encrypt certificate
-function generate_lets_encrypt() {
-    echo "Generating a Let's Encrypt certificate with Certbot..."
+# Function to configure Let's Encrypt certificate
+function use_lets_encrypt() {
+    echo "Using Let's Encrypt certificate with Certbot..."
 
     # Ensure `certbot` is installed
-    if ! command -v certbot &> /dev/null; then
+    if ! command -v sudo certbot &> /dev/null; then
         echo "Error: certbot is not installed. Install it with your package manager and try again."
         exit 1
     fi
@@ -65,15 +65,15 @@ function generate_lets_encrypt() {
     case "$WEB_SERVER" in
         nginx)
             echo "Using NGINX plugin for Certbot..."
-            certbot --nginx -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            sudo certbot --nginx -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
             ;;
         apache)
             echo "Using Apache plugin for Certbot..."
-            certbot --apache -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            sudo certbot --apache -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
             ;;
         none)
             echo "Using standalone mode for Certbot..."
-            certbot certonly --standalone --preferred-challenges http -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            sudo certbot certonly --standalone --preferred-challenges http -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
             ;;
         *)
             echo "Error: Unsupported web server '$WEB_SERVER'. Use 'nginx', 'apache', or 'none'."
@@ -81,13 +81,14 @@ function generate_lets_encrypt() {
             ;;
     esac
 
-    # Copy Let's Encrypt certificates to the output directory
+    # Verify Let's Encrypt certificate exists
     LETSENCRYPT_DIR="/etc/letsencrypt/live/$DOMAIN_NAME"
     if [[ -d "$LETSENCRYPT_DIR" ]]; then
-        mkdir -p "$BASE_DIR/$DIRNAME"
-        cp "$LETSENCRYPT_DIR/privkey.pem" "$KEY_FILE"
-        cp "$LETSENCRYPT_DIR/fullchain.pem" "$CERT_FILE"
-        echo "Let's Encrypt certificate and key generated:"
+        # Update variables to point to Let's Encrypt certificates
+        KEY_FILE="$LETSENCRYPT_DIR/privkey.pem"
+        CERT_FILE="$LETSENCRYPT_DIR/fullchain.pem"
+
+        echo "Let's Encrypt certificates found and will be used:"
         echo "  Key:  $KEY_FILE"
         echo "  Cert: $CERT_FILE"
     else
@@ -96,12 +97,18 @@ function generate_lets_encrypt() {
     fi
 }
 
-# Function to select the certificate type
-function generate_certificate() {
+# Function to select and use the correct certificate type
+function generate_or_use_certificate() {
     if [[ "$CERT_TYPE" -eq 1 ]]; then
+        # Set file paths for self-signed certificates
+        KEY_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.key"
+        CERT_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.crt"
+
+        # Generate a self-signed certificate
         generate_self_signed
     elif [[ "$CERT_TYPE" -eq 2 ]]; then
-        generate_lets_encrypt
+        # Use Let's Encrypt certificate (update KEY_FILE and CERT_FILE in the process)
+        use_lets_encrypt
     else
         echo "Error: Invalid certificate type specified. Use 1 for self-signed or 2 for Let's Encrypt."
         usage
@@ -139,9 +146,5 @@ if [[ -z "$DIRNAME" ]]; then
     DIRNAME="$DOMAIN_NAME"
 fi
 
-# Set file paths
-KEY_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.key"
-CERT_FILE="$BASE_DIR/$DIRNAME/$CERT_NAME.crt"
-
-# Generate the certificate
-generate_certificate
+# Generate or use the correct certificate
+generate_or_use_certificate
