@@ -173,11 +173,15 @@ EOF
 
     if [[ "$DISTRO" == "ubuntu" ]]; then
         sudo ln -sf "$VHOST_CONF_HTTP" /etc/nginx/sites-enabled/
-        [[ $SELF_SIGNED -eq 1 ]] && sudo ln -sf "$VHOST_CONF_HTTPS" /etc/nginx/sites-enabled/
+        if [[ $SELF_SIGNED -eq 1 ]]; then#
+            sudo ln -sf "$VHOST_CONF_HTTPS" /etc/nginx/sites-enabled/
+        fi
         sudo nginx -t && sudo systemctl reload nginx
     elif [[ "$DISTRO" == "gentoo" ]]; then
         sudo ln -sf "$VHOST_CONF_HTTP" /etc/nginx/conf.d/
-        [[ $SELF_SIGNED -eq 1 ]] && sudo ln -sf "$VHOST_CONF_HTTPS" /etc/nginx/conf.d/
+        if [[ $SELF_SIGNED -eq 1 ]]; then
+            sudo ln -sf "$VHOST_CONF_HTTPS" /etc/nginx/conf.d/
+        fi
         sudo rc-service nginx reload
     fi
 
