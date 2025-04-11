@@ -2,11 +2,12 @@
 
 # Default values
 CERT_NAME=$(date +%s | sha256sum | base64 | head -c 8)
+EMAIL="webmaster@nickel.icu"
 KEY_SIZE=4096
 DAYS_VALID=365
 BASE_DIR="$HOME/.local/certs"
 DIRNAME=""
-CERT_TYPE=1 # Default certificate type (1 = self-signed, 2 = Let's Encrypt)
+CERT_TYPE=2 # Default certificate type (1 = self-signed, 2 = Let's Encrypt)
 WEB_SERVER="nginx" # Default web server for Certbot is nginx
 
 # Function to display help
@@ -15,6 +16,7 @@ function usage() {
     echo "Options:"
     echo "  -c  Certificate name (optional, default is a random name)"
     echo "  -d  Domain name (required, e.g., example.com)"
+    echo "  -m  E-Mail (optional, default is $EMAIL)"
     echo "  -k  Key size (optional, default is 4096)"
     echo "  -v  Validity in days (optional, default is 365)"
     echo "  -o  Output directory (optional, default is ~/local/certs/)"
@@ -65,11 +67,11 @@ function use_lets_encrypt() {
     case "$WEB_SERVER" in
         nginx)
             echo "Using NGINX plugin for Certbot..."
-            sudo certbot --nginx -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            sudo certbot --nginx -d "$DOMAIN_NAME" --agree-tos --email $EMAIL
             ;;
         apache)
             echo "Using Apache plugin for Certbot..."
-            sudo certbot --apache -d "$DOMAIN_NAME" --agree-tos --register-unsafely-without-email
+            sudo certbot --apache -d "$DOMAIN_NAME" --agree-tos --email $EMAIL
             ;;
         none)
             echo "Using standalone mode for Certbot..."
