@@ -246,6 +246,18 @@ fi
 
 auto_detect_distro
 
+# check if Web directory exists, if not ask to create one 
+if [[ ! -d "$DOC_ROOT" ]];then
+    echo "$DOC_ROOT not found"
+    echo "Create one? [y/n]"
+    read a
+    if [[ "$a" == "y" ]]
+        mkdir -p "$DOC_ROOT"
+        echo "done"
+    else
+        exit 1
+    fi
+fi
 ERROR_LOG="/var/log/${WEB_SERVER}/${DOMAIN_NAME}_error.log"
 ACCESS_LOG="/var/log/${WEB_SERVER}/${DOMAIN_NAME}_access.log"
 
