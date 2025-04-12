@@ -216,7 +216,7 @@ edit_hosts() {
 # Function to display help
 usage() {
     echo "Usage: sudo $0 -t <document_root> -n <domain_name> [-s <nginx|apache>] [-k <ssl_key_dir>] [-a <server_alias>] [-6] [-l]"
-    echo "  -t  Root document directory (required)"
+    echo "  -t  Root document directory (optional, default is /var/www/ + Domain name)" 
     echo "  -n  Domain name (required)"
     echo "  -s  Web server (optional, default is nginx)"
     echo "  -k  SSL directory (optional, default is ~/.local/certs/)"
@@ -240,9 +240,14 @@ while getopts "t:n:s:k:a:6l" opt; do
     esac
 done
 
-if [[ -z "$DOC_ROOT" || -z "$DOMAIN_NAME" ]]; then
+#if [[ -z "$DOC_ROOT" || -z "$DOMAIN_NAME" ]]; then
+
+if [[ -z "$DOMAIN_NAME" ]]; then
     usage
 fi
+
+#set default for Web directory
+DOC_ROOT="/var/www/$DOMAIN_NAME"
 
 auto_detect_distro
 
@@ -253,11 +258,12 @@ if [[ ! -d "$DOC_ROOT" ]];then
     read a
     if [[ "$a" == "y" ]]
         mkdir -p "$DOC_ROOT"
-        echo "done"
+        echo "$DOC_ROOT created"
     else
         exit 1
     fi
 fi
+
 ERROR_LOG="/var/log/${WEB_SERVER}/${DOMAIN_NAME}_error.log"
 ACCESS_LOG="/var/log/${WEB_SERVER}/${DOMAIN_NAME}_access.log"
 
