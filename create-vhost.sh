@@ -247,7 +247,7 @@ if [[ -z "$DOMAIN_NAME" ]]; then
 fi
 
 #set default for Web directory
-DOC_ROOT="/var/www/$DOMAIN_NAME"
+DOC_ROOT="/var/www/html/$DOMAIN_NAME"
 
 auto_detect_distro
 
