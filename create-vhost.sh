@@ -173,7 +173,7 @@ EOF
 
     if [[ "$DISTRO" == "ubuntu" ]]; then
         sudo ln -sf "$VHOST_CONF_HTTP" /etc/nginx/sites-enabled/
-        if [[ $SELF_SIGNED -eq 1 ]]; then#
+        if [[ $SELF_SIGNED -eq 1 ]]; then
             sudo ln -sf "$VHOST_CONF_HTTPS" /etc/nginx/sites-enabled/
         fi
         sudo nginx -t && sudo systemctl reload nginx
@@ -256,7 +256,7 @@ if [[ ! -d "$DOC_ROOT" ]];then
     echo "$DOC_ROOT not found"
     echo "Create one? [y/n]"
     read a
-    if [[ "$a" == "y" ]]
+    if [[ "$a" == "y" ]]; then
         mkdir -p "$DOC_ROOT"
         echo "$DOC_ROOT created"
     else
