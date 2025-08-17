@@ -1,0 +1,70 @@
+#!/bin/bash
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage() {
+    echo "weser - Web Server Management Dispatcher"
+    echo ""
+    echo "Usage: weser <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  lamp       Setup LAMP (Linux, Apache, MySQL, PHP) stack"
+    echo "  lemp       Setup LEMP (Linux, Nginx, MySQL, PHP) stack"
+    echo "  vhost      Create virtual host configuration"
+    echo "  ssl        Generate SSL certificates"
+    echo ""
+    echo "Examples:"
+    echo "  weser lamp                           # Setup LAMP stack"
+    echo "  weser vhost -n example.com          # Create virtual host"
+    echo "  weser ssl -d example.com -t 1       # Generate self-signed SSL"
+    echo ""
+    echo "For command-specific help, use:"
+    echo "  weser <command> --help"
+    exit 1
+}
+
+check_script_exists() {
+    local script="$1"
+    if [[ ! -f "$SCRIPT_DIR/$script" ]]; then
+        echo "Error: Script $script not found in $SCRIPT_DIR"
+        exit 1
+    fi
+    if [[ ! -x "$SCRIPT_DIR/$script" ]]; then
+        echo "Error: Script $script is not executable"
+        exit 1
+    fi
+}
+
+if [[ $# -eq 0 ]]; then
+    usage
+fi
+
+command="$1"
+shift
+
+case "$command" in
+    lamp)
+        check_script_exists "create-lamp.sh"
+        exec "$SCRIPT_DIR/create-lamp.sh" "$@"
+        ;;
+    lemp)
+        check_script_exists "create-lemp.sh"
+        exec "$SCRIPT_DIR/create-lemp.sh" "$@"
+        ;;
+    vhost)
+        check_script_exists "create-vhost.sh"
+        exec "$SCRIPT_DIR/create-vhost.sh" "$@"
+        ;;
+    ssl)
+        check_script_exists "create-ssl-cert.sh"
+        exec "$SCRIPT_DIR/create-ssl-cert.sh" "$@"
+        ;;
+    --help|-h|help)
+        usage
+        ;;
+    *)
+        echo "Error: Unknown command '$command'"
+        echo ""
+        usage
+        ;;
+esac
