@@ -21,8 +21,8 @@ function usage() {
     echo "  -v  Validity in days (optional, default is 365)"
     echo "  -o  Output directory (optional, default is ~/local/certs/)"
     echo "  -n  Custom directory name for the key and cert (optional)"
-    echo "  -t  Certificate type (1 = self-signed, 2 = Let's Encrypt, default is 2)"
-    echo "  -w  Web server to configure for Certbot (optional, options: nginx, apache, none)"
+    echo "  -t  Certificate type (1 = self-signed, 2 = Let's Encrypt, default is 2)" 
+    echo "  -w  Web server to configure for Certbot (optional, options: nginx, apache, none) default is nginx"
     exit 1
 }
 
