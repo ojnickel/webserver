@@ -9,8 +9,8 @@ This repository contains shell scripts for automated server setup and configurat
 ## Core Scripts and Usage
 
 ### Server Stack Installation
-- `./create-lamp.sh` - Sets up Linux, Apache, MySQL/MariaDB, PHP stack
-- `./create-lemp.sh` - Sets up Linux, Nginx, MySQL/MariaDB, PHP stack
+- `./src/create-lamp.sh` - Sets up Linux, Apache, MySQL/MariaDB, PHP stack
+- `./src/create-lemp.sh` - Sets up Linux, Nginx, MySQL/MariaDB, PHP stack
 
 Both scripts:
 - Auto-detect Ubuntu or Gentoo distributions
@@ -20,9 +20,9 @@ Both scripts:
 - Set up database security
 
 ### Virtual Host Management
-- `./create-vhost.sh` - Creates Apache or Nginx virtual hosts with SSL support
+- `./src/create-vhost.sh` - Creates Apache or Nginx virtual hosts with SSL support
 
-Usage: `sudo ./create-vhost.sh -n <domain_name> [options]`
+Usage: `sudo ./src/create-vhost.sh -n <domain_name> [options]`
 
 Key options:
 - `-n` Domain name (required)
@@ -33,9 +33,9 @@ Key options:
 - `-k` SSL directory (default: ~/.local/certs/)
 
 ### SSL Certificate Generation
-- `./create-ssl-cert.sh` - Generates self-signed certificates or configures Let's Encrypt
+- `./src/create-ssl-cert.sh` - Generates self-signed certificates or configures Let's Encrypt
 
-Usage: `./create-ssl-cert.sh -d <domain_name> [options]`
+Usage: `./src/create-ssl-cert.sh -d <domain_name> [options]`
 
 Key options:
 - `-d` Domain name (required)
@@ -65,7 +65,8 @@ The scripts support two Linux distributions with different package managers and 
 - WSL2 detection with Windows hosts file integration
 
 ## File Structure
-- Main scripts in repository root
+- Main scripts in `src/` directory
+- Configuration dispatcher: `weser` command in repository root
 - Example configuration: `kpx.nickel.icu_http` (Nginx vhost with SSL and basic auth)
 - Generated certificates: `~/.local/certs/`
 - Web document roots: `/var/www/html/<domain_name>/`

@@ -25,11 +25,11 @@ usage() {
 
 check_script_exists() {
     local script="$1"
-    if [[ ! -f "$SCRIPT_DIR/$script" ]]; then
-        echo "Error: Script $script not found in $SCRIPT_DIR"
+    if [[ ! -f "$SCRIPT_DIR/src/$script" ]]; then
+        echo "Error: Script $script not found in $SCRIPT_DIR/src"
         exit 1
     fi
-    if [[ ! -x "$SCRIPT_DIR/$script" ]]; then
+    if [[ ! -x "$SCRIPT_DIR/src/$script" ]]; then
         echo "Error: Script $script is not executable"
         exit 1
     fi
@@ -45,19 +45,19 @@ shift
 case "$command" in
     lamp)
         check_script_exists "create-lamp.sh"
-        exec "$SCRIPT_DIR/create-lamp.sh" "$@"
+        exec "$SCRIPT_DIR/src/create-lamp.sh" "$@"
         ;;
     lemp)
         check_script_exists "create-lemp.sh"
-        exec "$SCRIPT_DIR/create-lemp.sh" "$@"
+        exec "$SCRIPT_DIR/src/create-lemp.sh" "$@"
         ;;
     vhost)
         check_script_exists "create-vhost.sh"
-        exec "$SCRIPT_DIR/create-vhost.sh" "$@"
+        exec "$SCRIPT_DIR/src/create-vhost.sh" "$@"
         ;;
     ssl)
         check_script_exists "create-ssl-cert.sh"
-        exec "$SCRIPT_DIR/create-ssl-cert.sh" "$@"
+        exec "$SCRIPT_DIR/src/create-ssl-cert.sh" "$@"
         ;;
     --help|-h|help)
         usage

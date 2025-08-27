@@ -58,16 +58,16 @@ weser vhost --help
 
 ```bash
 # Install LAMP Stack
-sudo ./create-lamp.sh
+sudo ./src/create-lamp.sh
 
 # Install LEMP Stack
-sudo ./create-lemp.sh
+sudo ./src/create-lemp.sh
 
 # Create Virtual Host
-sudo ./create-vhost.sh -n example.com -l
+sudo ./src/create-vhost.sh -n example.com -l
 
 # Generate SSL Certificate
-./create-ssl-cert.sh -d example.com -t 1
+./src/create-ssl-cert.sh -d example.com -t 1
 ```
 
 ## Supported Distributions
