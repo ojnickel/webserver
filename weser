@@ -1,6 +1,8 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve the actual script directory, following symlinks to get the real path
+# This ensures the script works when installed as a symlink in ~/.local/bin
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
 usage() {
     echo "weser - Web Server Management Dispatcher"
