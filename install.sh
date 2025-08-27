@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BIN_DIR="$HOME/bin"
+BIN_DIR="$HOME/.local/bin"
 WESER_SOURCE="$SCRIPT_DIR/weser"
 WESER_TARGET="$BIN_DIR/weser"
 
@@ -23,17 +23,16 @@ if [[ ! -d "$BIN_DIR" ]]; then
 fi
 
 echo "Installing weser to $WESER_TARGET"
-cp "$WESER_SOURCE" "$WESER_TARGET"
-chmod +x "$WESER_TARGET"
+ln -sf "$WESER_SOURCE" "$WESER_TARGET"
 
 if ! echo "$PATH" | grep -q "$BIN_DIR"; then
     echo ""
     echo "WARNING: $BIN_DIR is not in your PATH"
     echo "Add the following line to your shell configuration file (~/.bashrc, ~/.zshrc, etc.):"
-    echo "    export PATH=\"\$HOME/bin:\$PATH\""
+    echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
     echo ""
     echo "Or run this command and restart your shell:"
-    echo "    echo 'export PATH=\"\$HOME/bin:\$PATH\"' >> ~/.bashrc"
+    echo "    echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
     echo ""
 fi
 
