@@ -15,9 +15,15 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Prompt for PHP version
-echo "Enter PHP version (e.g., 7.4, 8.0, 8.1):"
+# Prompt for PHP version or use latest
+echo "Enter PHP version (e.g., 7.4, 8.0, 8.1) or press Enter for latest:"
 read PHP_VERSION
+
+# Default to latest PHP version if none specified
+if [[ -z "$PHP_VERSION" ]]; then
+    PHP_VERSION="8.3"
+    echo "Using latest PHP version: $PHP_VERSION"
+fi
 
 # Function to install LAMP and switch PHP on Ubuntu
 install_ubuntu() {
