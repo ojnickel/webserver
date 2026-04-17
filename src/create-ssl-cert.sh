@@ -7,7 +7,7 @@ KEY_SIZE=4096
 DAYS_VALID=365
 BASE_DIR="$HOME/.local/certs"
 DIRNAME=""
-CERT_TYPE=2 # Default certificate type (1 = self-signed, 2 = Let's Encrypt)
+CERT_TYPE=1 # Default certificate type (1 = self-signed, 2 = Let's Encrypt)
 WEB_SERVER="nginx" # Default web server for Certbot is nginx
 
 # Function to display help
