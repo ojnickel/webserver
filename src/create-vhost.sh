@@ -217,22 +217,13 @@ is_wsl2() {
     return $?
 }
 
-# Edit /etc/hosts or Windows hosts file
+# Edit /etc/hosts
 edit_hosts() {
-    if is_wsl2; then
-        if powershell.exe -Command "Get-Content C:\\Windows\\System32\\drivers\\etc\\hosts" | grep -q "$DOMAIN_NAME"; then
-            echo "$DOMAIN_NAME already exists in Windows hosts file."
-        else
-            powershell.exe -Command "Add-Content C:\\Windows\\System32\\drivers\\etc\\hosts '127.0.0.1 $DOMAIN_NAME'"
-            echo "Added $DOMAIN_NAME to Windows hosts file."
-        fi
+    if grep -q "$DOMAIN_NAME" /etc/hosts; then
+        echo "$DOMAIN_NAME already exists in /etc/hosts."
     else
-        if grep -q "$DOMAIN_NAME" /etc/hosts; then
-            echo "$DOMAIN_NAME already exists in /etc/hosts."
-        else
-            echo "127.0.0.1 $DOMAIN_NAME" | sudo tee -a /etc/hosts > /dev/null
-            echo "Added $DOMAIN_NAME to /etc/hosts."
-        fi
+        echo "127.0.0.1 $DOMAIN_NAME" | sudo tee -a /etc/hosts > /dev/null
+        echo "Added $DOMAIN_NAME to /etc/hosts."
     fi
 }
 
