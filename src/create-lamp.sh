@@ -15,16 +15,6 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Prompt for PHP version or use latest
-echo "Enter PHP version (e.g., 7.4, 8.0, 8.1) or press Enter for latest:"
-read PHP_VERSION
-
-# Default to latest PHP version if none specified
-if [[ -z "$PHP_VERSION" ]]; then
-    PHP_VERSION="8.3"
-    echo "Using latest PHP version: $PHP_VERSION"
-fi
-
 # Function to install LAMP and switch PHP on Ubuntu
 install_ubuntu() {
     echo "Updating package lists..."
@@ -33,6 +23,10 @@ install_ubuntu() {
     echo "Adding Ondrej PHP repository..."
     sudo add-apt-repository ppa:ondrej/php -y
     sudo apt-get update
+
+    echo "Detecting latest PHP version..."
+    PHP_VERSION=$(apt-cache search "^php[0-9]" | grep -oP 'php\K[0-9]+\.[0-9]+' | sort -rV | head -1)
+    echo "Using PHP $PHP_VERSION"
 
     echo "Installing Apache..."
     sudo apt-get install -y apache2
