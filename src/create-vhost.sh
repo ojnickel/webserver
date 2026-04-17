@@ -25,6 +25,14 @@ auto_detect_distro() {
     fi
 }
 
+# Generate cert if not already present
+ensure_ssl_cert() {
+    if [[ ! -d "$SSL_KEY_DIR$DOMAIN_NAME" ]]; then
+        echo "No certificate found for $DOMAIN_NAME, generating self-signed cert..."
+        "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/create-ssl-cert.sh" -d "$DOMAIN_NAME" -t 1 -o "$SSL_KEY_DIR"
+    fi
+}
+
 #Function to add https for apache/nginx
 ssl(){
     # Check if certs exist
@@ -130,6 +138,7 @@ EOF
 EOF
 
     if [[ $SELF_SIGNED -eq 1 ]]; then
+        ensure_ssl_cert
         ssl
     fi
 
@@ -189,6 +198,7 @@ fi)
 EOF
 
     if [[ $SELF_SIGNED -eq 1 ]]; then
+        ensure_ssl_cert
         ssl
     fi
 
