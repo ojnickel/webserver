@@ -8,6 +8,7 @@ SELF_SIGNED=0 #default. only when turned on -> self-signed certificates
 SSL_KEY_DIR="$HOME/.local/certs/"
 WEB_SERVER="nginx" #default
 DISTRO=""
+PHP=false
 
 # Auto-detect distribution
 auto_detect_distro() {
@@ -148,18 +149,40 @@ EOF
 # Function to create Nginx virtual host
 create_nginx_vhost() {
     sudo mkdir -p "/var/log/nginx"
+
+    if [[ "$PHP" == true ]]; then
+        local php_sock
+        php_sock=$(ls /var/run/php/php*-fpm.sock 2>/dev/null | sort -rV | head -1)
+        if [[ -z "$php_sock" ]]; then
+            echo "Error: No PHP-FPM socket found. Is php-fpm running?"
+            exit 1
+        fi
+    fi
+
     sudo tee "$VHOST_CONF_HTTP" > /dev/null <<EOF
 server {
     listen 80;
     server_name $DOMAIN_NAME $SERVER_ALIAS;
 
     root $DOC_ROOT;
-    index index.html index.htm;
+    index $([ "$PHP" == true ] && echo "index.php ")index.html index.htm;
 
     location / {
-        try_files \$uri \$uri/ =404;
+        try_files \$uri \$uri/ $([ "$PHP" == true ] && echo "/index.php?\$args" || echo "=404");
+    }
+$(if [[ "$PHP" == true ]]; then
+echo "
+    location ~ \.php\$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:$php_sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
     }
 
+    location ~ /\.ht {
+        deny all;
+    }"
+fi)
     access_log $ACCESS_LOG;
     error_log $ERROR_LOG;
 }
@@ -216,18 +239,19 @@ edit_hosts() {
 # Function to display help
 usage() {
     echo "Usage: sudo $0 -t <document_root> -n <domain_name> [-s <nginx|apache>] [-k <ssl_key_dir>] [-a <server_alias>] [-6] [-l]"
-    echo "  -t  Root document directory (optional, default is /var/www/ + Domain name)" 
+    echo "  -t  Root document directory (optional, default is /var/www/ + Domain name)"
     echo "  -n  Domain name (required)"
     echo "  -s  Web server (optional, default is nginx)"
     echo "  -k  SSL directory (optional, default is ~/.local/certs/)"
     echo "  -a  Server alias (optional)"
     echo "  -6  Enable IPv6"
     echo "  -l  Enable self-signed SSL"
+    echo "  -p  Enable PHP-FPM (auto-detects installed socket)"
     exit 1
 }
 
 # Parse arguments
-while getopts "t:n:s:k:a:6l" opt; do
+while getopts "t:n:s:k:a:6lp" opt; do
     case "$opt" in
         t) DOC_ROOT=$OPTARG ;;
         n) DOMAIN_NAME=$OPTARG ;;
@@ -236,6 +260,7 @@ while getopts "t:n:s:k:a:6l" opt; do
         a) SERVER_ALIAS=$OPTARG ;;
         6) USE_IPV6=true ;;
         l) SELF_SIGNED=1 ;;
+        p) PHP=true ;;
         *) usage ;;
     esac
 done

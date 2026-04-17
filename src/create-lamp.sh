@@ -69,6 +69,10 @@ install_gentoo() {
     sudo rc-update add mariadb default
     sudo /etc/init.d/mariadb start
 
+    echo "Detecting latest PHP version..."
+    PHP_VERSION=$(ls /var/db/repos/gentoo/dev-lang/php/ 2>/dev/null | grep -oP '^\d+\.\d+' | sort -rV | head -1)
+    echo "Using PHP $PHP_VERSION"
+
     echo "Installing PHP $PHP_VERSION with necessary extensions..."
     sudo emerge --ask dev-lang/php:$(echo $PHP_VERSION | tr -d '.')
 

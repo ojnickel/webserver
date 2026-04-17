@@ -58,7 +58,7 @@ function use_lets_encrypt() {
     echo "Using Let's Encrypt certificate with Certbot..."
 
     # Ensure `certbot` is installed
-    if ! command -v sudo certbot &> /dev/null; then
+    if ! command -v certbot &> /dev/null; then
         echo "Error: certbot is not installed. Install it with your package manager and try again."
         exit 1
     fi
