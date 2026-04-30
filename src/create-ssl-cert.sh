@@ -7,7 +7,7 @@ KEY_SIZE=4096
 DAYS_VALID=365
 BASE_DIR="$HOME/.local/certs"
 DIRNAME=""
-CERT_TYPE=1 # Default certificate type (1 = self-signed, 2 = Let's Encrypt)
+CERT_TYPE=3 # Default certificate type (1 = self-signed, 2 = Let's Encrypt, 3 = mkcert)
 WEB_SERVER="nginx" # Default web server for Certbot is nginx
 
 # Function to display help
@@ -49,6 +49,24 @@ function generate_self_signed() {
     rm "$BASE_DIR/$DIRNAME/$CERT_NAME.csr"
 
     echo "Self-signed certificate and key generated:"
+    echo "  Key:  $KEY_FILE"
+    echo "  Cert: $CERT_FILE"
+}
+
+# Function to generate a certificate using mkcert
+function generate_mkcert() {
+    if ! command -v mkcert &> /dev/null; then
+        echo "Error: mkcert is not installed. Install with: sudo apt install mkcert libnss3-tools"
+        exit 1
+    fi
+
+    mkdir -p "$BASE_DIR/$DIRNAME"
+    KEY_FILE="$BASE_DIR/$DIRNAME/$DOMAIN_NAME.key"
+    CERT_FILE="$BASE_DIR/$DIRNAME/$DOMAIN_NAME.crt"
+
+    mkcert -cert-file "$CERT_FILE" -key-file "$KEY_FILE" "$DOMAIN_NAME"
+
+    echo "mkcert certificate generated:"
     echo "  Key:  $KEY_FILE"
     echo "  Cert: $CERT_FILE"
 }
@@ -111,8 +129,10 @@ function generate_or_use_certificate() {
     elif [[ "$CERT_TYPE" -eq 2 ]]; then
         # Use Let's Encrypt certificate (update KEY_FILE and CERT_FILE in the process)
         use_lets_encrypt
+    elif [[ "$CERT_TYPE" -eq 3 ]]; then
+        generate_mkcert
     else
-        echo "Error: Invalid certificate type specified. Use 1 for self-signed or 2 for Let's Encrypt."
+        echo "Error: Invalid certificate type specified. Use 1 for self-signed, 2 for Let's Encrypt, or 3 for mkcert."
         usage
     fi
 }

@@ -28,8 +28,10 @@ auto_detect_distro() {
 # Generate cert if not already present
 ensure_ssl_cert() {
     if [[ ! -d "$SSL_KEY_DIR$DOMAIN_NAME" ]]; then
-        echo "No certificate found for $DOMAIN_NAME, generating self-signed cert..."
-        "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/create-ssl-cert.sh" -d "$DOMAIN_NAME" -t 1 -o "$SSL_KEY_DIR"
+        local cert_type=1
+        command -v mkcert &> /dev/null && cert_type=3
+        echo "No certificate found for $DOMAIN_NAME, generating cert (type $cert_type)..."
+        "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/create-ssl-cert.sh" -d "$DOMAIN_NAME" -t "$cert_type" -o "$SSL_KEY_DIR"
     fi
 }
 
