@@ -60,6 +60,13 @@ function generate_mkcert() {
         exit 1
     fi
 
+    local caroot
+    caroot=$(mkcert -CAROOT)
+    if [[ ! -f "$caroot/rootCA.pem" ]]; then
+        echo "Installing mkcert local CA..."
+        mkcert -install
+    fi
+
     mkdir -p "$BASE_DIR/$DIRNAME"
     KEY_FILE="$BASE_DIR/$DIRNAME/$DOMAIN_NAME.key"
     CERT_FILE="$BASE_DIR/$DIRNAME/$DOMAIN_NAME.crt"
