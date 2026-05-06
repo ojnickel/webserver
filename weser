@@ -10,14 +10,16 @@ usage() {
     echo "Usage: weser <command> [options]"
     echo ""
     echo "Commands:"
-    echo "  lamp       Setup LAMP (Linux, Apache, MySQL, PHP) stack"
-    echo "  lemp       Setup LEMP (Linux, Nginx, MySQL, PHP) stack"
-    echo "  vhost      Create virtual host configuration"
-    echo "  ssl        Generate SSL certificates"
+    echo "  lamp              Setup LAMP (Linux, Apache, MySQL, PHP) stack"
+    echo "  lemp              Setup LEMP (Linux, Nginx, MySQL, PHP) stack"
+    echo "  vhost             Create virtual host configuration"
+    echo "  delete vhost      Delete virtual host and its certificate"
+    echo "  ssl               Generate SSL certificates"
     echo ""
     echo "Examples:"
     echo "  weser lamp                           # Setup LAMP stack"
     echo "  weser vhost -n example.com          # Create virtual host"
+    echo "  weser delete vhost -n example.com   # Delete virtual host and cert"
     echo "  weser ssl -d example.com -t 1       # Generate self-signed SSL"
     echo ""
     echo "For command-specific help, use:"
@@ -60,6 +62,21 @@ case "$command" in
     ssl)
         check_script_exists "create-ssl-cert.sh"
         exec "$SCRIPT_DIR/src/create-ssl-cert.sh" "$@"
+        ;;
+    delete)
+        subcommand="${1:-}"
+        shift
+        case "$subcommand" in
+            vhost)
+                check_script_exists "delete-vhost.sh"
+                exec "$SCRIPT_DIR/src/delete-vhost.sh" "$@"
+                ;;
+            *)
+                echo "Error: Unknown target '${subcommand}' for delete. Did you mean 'vhost'?"
+                echo ""
+                usage
+                ;;
+        esac
         ;;
     --help|-h|help)
         usage
