@@ -85,21 +85,50 @@ EOF
 EOF
 
     elif [[ "$WEB_SERVER" == "nginx" ]]; then
+        # When -p is passed, find the FPM socket and build the PHP location block.
+        # We check both /var/run/php and /run/php since the path varies by distro/version.
+        local php_block=""
+        if [[ "$PHP" == true ]]; then
+            local php_sock
+            php_sock=$(ls /var/run/php/php*-fpm.sock 2>/dev/null | sort -rV | head -1)
+            [[ -z "$php_sock" ]] && php_sock=$(ls /run/php/php*-fpm.sock 2>/dev/null | sort -rV | head -1)
+
+            if [[ -z "$php_sock" ]]; then
+                echo "Error: No PHP-FPM socket found. Is php-fpm running?"
+                exit 1
+            fi
+
+            php_block="
+    # Pass .php requests to PHP-FPM
+    location ~ \.php\$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:$php_sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    # Deny access to .htaccess files
+    location ~ /\.ht {
+        deny all;
+    }"
+        fi
+
         sudo tee "$VHOST_CONF_HTTPS" > /dev/null <<EOF
 server {
     listen 443 ssl;
     server_name $DOMAIN_NAME $SERVER_ALIAS;
 
     root $DOC_ROOT;
-    index index.html index.htm;
+    index $([ "$PHP" == true ] && echo "index.php ")index.html index.htm;
 
     ssl_certificate $SSL_CERT;
     ssl_certificate_key $SSL_KEY;
 
     location / {
-        try_files \$uri \$uri/ =404;
+        # Route through index.php for WordPress/apps when PHP is enabled, otherwise 404
+        try_files \$uri \$uri/ $([ "$PHP" == true ] && echo "/index.php?\$args" || echo "=404");
     }
-
+$php_block
     access_log $ACCESS_LOG;
     error_log $ERROR_LOG;
 }
