@@ -8,7 +8,7 @@ SELF_SIGNED=0 #default. only when turned on -> self-signed certificates
 SSL_KEY_DIR="$HOME/.local/certs/"
 WEB_SERVER="nginx" #default
 DISTRO=""
-PHP=false
+PHP=true
 
 # Auto-detect distribution
 auto_detect_distro() {
