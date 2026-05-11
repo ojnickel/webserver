@@ -125,6 +125,7 @@ server {
     ssl_certificate_key $SSL_KEY;
 
     location / {
+        autoindex on;
         # Route through index.php for WordPress/apps when PHP is enabled, otherwise 404
         try_files \$uri \$uri/ $([ "$PHP" == true ] && echo "/index.php?\$args" || echo "=404");
     }
@@ -208,6 +209,7 @@ server {
     index $([ "$PHP" == true ] && echo "index.php ")index.html index.htm;
 
     location / {
+        autoindex on;
         try_files \$uri \$uri/ $([ "$PHP" == true ] && echo "/index.php?\$args" || echo "=404");
     }
 $(if [[ "$PHP" == true ]]; then
